@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>闲鱼电影资源封面-原型重构</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&family=Noto+Sans+SC:wght@400;700;900&display=swap');
+        
+        body {
+            font-family: 'Inter', 'Noto Sans SC', sans-serif;
+            background: #0f0f13;
+        }
+        
+        /* 玻璃态效果 */
+        .glass-tag {
+            background: rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2), 
+                        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+        
+        /* 噪点纹理 */
+        .noise {
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
+        }
+        
+        /* 海报阴影 - 右侧投射 */
+        .poster-glow {
+            box-shadow: -10px 0 40px -10px rgba(0, 0, 0, 0.6),
+                        0 0 60px -20px rgba(59, 130, 246, 0.3);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-8 bg-zinc-950">
+
+    <!-- 主容器：750x750px，圆角 -->
+    <div class="w-[750px] h-[750px] relative rounded-[32px] overflow-hidden bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 noise shadow-2xl">
+        
+        <!-- 环境光效 -->
+        <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[120px] pointer-events-none"></div>
+        <div class="absolute bottom-0 left-0 w-[400px] h-[400px] bg-orange-500/5 rounded-full blur-[100px] pointer-events-none"></div>
+
+        <!-- 顶部标题区：通栏 -->
+        <div class="h-[100px] flex items-center justify-center relative z-20 border-b border-white/5 bg-black/20 backdrop-blur-sm">
+            <div class="flex items-center gap-3">
+                <!-- 装饰性引号 -->
+                <span class="text-3xl text-white/10 font-serif">"</span>
+                <h1 class="text-3xl font-black text-white tracking-wider">
+                    疯狂动物城<span class="text-orange-400">2</span>
+                </h1>
+                <span class="text-3xl text-white/10 font-serif">"</span>
+            </div>
+            <!-- 英文小字 -->
+            <div class="absolute bottom-3 left-1/2 -translate-x-1/2 text-[10px] text-white/30 tracking-[0.4em] uppercase font-semibold">
+                Zootopia 2 · Disney
+            </div>
+        </div>
+
+        <!-- 主体内容区：左右分栏 -->
+        <div class="flex h-[650px]">
+            
+            <!-- 左侧：电影海报（约60%） -->
+            <div class="w-[60%] relative flex items-center justify-center p-8">
+                <!-- 海报容器 -->
+                <div class="relative w-full h-[90%] rounded-2xl overflow-hidden poster-glow group">
+                    <!-- 电影海报图片（使用占位图，实际使用时替换为真实海报URL） -->
+                    <div class="absolute inset-0 bg-cover bg-center bg-no-repeat transition-transform duration-700 scale-105" 
+                         style="background-image: url('https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=800&auto=format&fit=crop');">
+                    </div>
+                    
+                    <!-- 渐变遮罩：让海报与背景融合 -->
+                    <div class="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-black/20"></div>
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
+                    
+                    <!-- 海报内角标：年份 -->
+                    <div class="absolute top-4 left-4 px-3 py-1 bg-orange-500 text-white text-xs font-bold rounded-full shadow-lg">
+                        2025 NEW
+                    </div>
+                </div>
+                
+                <!-- 左侧装饰线 -->
+                <div class="absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-[200px] bg-gradient-to-b from-transparent via-white/20 to-transparent"></div>
+            </div>
+
+            <!-- 右侧：信息区（约40%） -->
+            <div class="w-[40%] flex flex-col px-6 py-4 relative z-10">
+                
+                <!-- 上半部分：玻璃态标签组（垂直排列） -->
+                <div class="flex-1 flex flex-col justify-start gap-3 pt-8">
+                    
+                    <!-- 标签1：4K超清 -->
+                    <div class="glass-tag py-3 px-4 rounded-2xl flex items-center gap-3 transform hover:scale-[1.02] transition-transform">
+                        <div class="w-8 h-8 rounded-lg bg-cyan-500/20 flex items-center justify-center text-lg">🎬</div>
+                        <div>
+                            <div class="text-cyan-300 text-sm font-bold leading-tight">4K HDR</div>
+                            <div class="text-white/50 text-[10px]">2160P 超清画质</div>
+                        </div>
+                    </div>
+
+                    <!-- 标签2：限时免费 -->
+                    <div class="glass-tag py-3 px-4 rounded-2xl flex items-center gap-3 transform hover:scale-[1.02] transition-transform">
+                        <div class="w-8 h-8 rounded-lg bg-rose-500/20 flex items-center justify-center text-lg">⚡</div>
+                        <div>
+                            <div class="text-rose-400 text-sm font-bold leading-tight">限时免费</div>
+                            <div class="text-white/50 text-[10px]">原价已购 现无偿分享</div>
+                        </div>
+                    </div>
+
+                    <!-- 标签3：多语字幕 -->
+                    <div class="glass-tag py-3 px-4 rounded-2xl flex items-center gap-3 transform hover:scale-[1.02] transition-transform">
+                        <div class="w-8 h-8 rounded-lg bg-amber-500/20 flex items-center justify-center text-lg">🌐</div>
+                        <div>
+                            <div class="text-amber-400 text-sm font-bold leading-tight">特效字幕</div>
+                            <div class="text-white/50 text-[10px]">中英双语 精校字幕</div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- 中间：下单秒发货（强调区） -->
+                <div class="py-8 flex flex-col items-center justify-center">
+                    <div class="w-12 h-[2px] bg-gradient-to-r from-transparent via-white/30 to-transparent mb-4"></div>
+                    
+                    <div class="text-center">
+                        <div class="text-white/90 font-bold text-lg tracking-widest mb-1">下单秒发货</div>
+                        <div class="text-emerald-400 text-xs font-mono flex items-center justify-center gap-1">
+                            <span class="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></span>
+                            自动客服 · 24小时在线
+                        </div>
+                    </div>
+                    
+                    <div class="w-12 h-[2px] bg-gradient-to-r from-transparent via-white/30 to-transparent mt-4"></div>
+                </div>
+
+                <!-- 下半部分：网盘LOGO -->
+                <div class="pb-8 flex flex-col gap-3">
+                    <div class="text-[10px] text-white/40 text-center uppercase tracking-widest mb-1">支持网盘</div>
+                    
+                    <div class="flex gap-3 justify-center">
+                        <!-- 百度网盘 -->
+                        <div class="flex-1 aspect-[4/3] glass-tag rounded-xl flex flex-col items-center justify-center gap-2 hover:bg-blue-500/20 transition-colors cursor-pointer">
+                            <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-bold">百</div>
+                            <span class="text-blue-300 text-[10px] font-bold">百度网盘</span>
+                        </div>
+                        
+                        <!-- 阿里云盘 -->
+                        <div class="flex-1 aspect-[4/3] glass-tag rounded-xl flex flex-col items-center justify-center gap-2 hover:bg-orange-500/20 transition-colors cursor-pointer">
+                            <div class="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center text-white text-xs font-bold">阿</div>
+                            <span class="text-orange-300 text-[10px] font-bold">阿里云盘</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- 底部装饰条 -->
+        <div class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-rose-500/50 via-amber-500/50 to-cyan-500/50"></div>
+    </div>
+
+</body>
+</html>

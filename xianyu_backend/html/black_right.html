@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>左图右文-暗色风格模板</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@xz/fonts@1/serve/inter.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #ffffff;
+        }
+        .noise-bg {
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
+        }
+        .poster-shadow {
+            box-shadow: 5px 0 20px -5px rgba(0,0,0,0.7);
+        }
+        .placeholder {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #9ca3af;
+            background: rgba(255,255,255,0.03);
+            border: 1px dashed rgba(255,255,255,0.1);
+        }
+        .watermark {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+        .watermark::before {
+            content: "叶子影视          叶子影视          叶子影视          叶子影视\A叶子影视          叶子影视          叶子影视          叶子影视\A叶子影视          叶子影视          叶子影视          叶子影视\A叶子影视          叶子影视          叶子影视          叶子影视";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-25deg);
+            width: 150%;
+            height: 150%;
+            font-size: 12px;
+            font-weight: bold;
+            color: rgba(255, 255, 255, 0.08);
+            white-space: pre-line;
+            line-height: 150px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <!-- 主容器：750x750 闲鱼标准规格 -->
+    <div class="w-[750px] h-[750px] bg-zinc-900 rounded-lg overflow-hidden flex flex-col relative noise-bg">
+        <!-- 水印 -->
+        <div class="watermark">叶子影视</div>
+        <!-- 顶部标题栏：横跨全宽 -->
+        <div class="h-[12%] border-b border-white/10 flex items-center justify-center px-4 relative">
+            <div class="flex flex-col items-center gap-1">
+                <div class="flex items-center gap-3">
+                    <!-- 装饰性引号 -->
+                    <span class="text-3xl text-white/10 font-serif">"</span>
+                    <h1 class="text-4xl font-black text-white tracking-tight">
+                        疯狂动物城<span class="text-amber-500">2</span>
+                    </h1>
+                    <span class="text-3xl text-white/10 font-serif">"</span>
+                </div>
+                <!-- 店铺名称 -->
+                <div class="text-[10px] text-white/40 tracking-[0.2em] font-italic">
+                    叶子影视🍃
+                </div>
+            </div>
+        </div>
+
+        <!-- 主体内容区：左图右文 -->
+        <div class="flex-1 flex flex-row">
+            <!-- 左侧海报区（占65%宽度） -->
+            <div class="w-[65%] relative poster-shadow">
+                <!-- 海报占位符（替换background-image为实际海报URL） -->
+                <div class="absolute inset-0 placeholder bg-cover bg-center bg-no-repeat">
+                    <span class="text-lg text-white/50">海报占位</span>
+                </div>
+                <!-- 精致遮罩：提升层次感 -->
+                <div class="absolute inset-0 bg-gradient-to-t from-zinc-900/70 via-transparent to-transparent"></div>
+                <!-- 顶部高光装饰 -->
+                <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500/0 via-amber-500/30 to-amber-500/0"></div>
+            </div>
+
+            <!-- 右侧信息区（占35%宽度） -->
+            <div class="w-[35%] p-5 flex flex-col gap-6">
+                <!-- 玻璃态标签组 -->
+                <div class="flex flex-col gap-4">
+                    <div class="px-5 py-3 bg-cyan-500/20 border border-cyan-500/40 rounded-lg">
+                        <span class="text-cyan-400 text-base font-bold tracking-wider">🎬 1080P 高清</span>
+                    </div>
+                    <div class="px-5 py-3 bg-amber-500/20 border border-amber-500/40 rounded-lg">
+                        <span class="text-amber-400 text-base font-bold tracking-wider">⚡ 双盘秒发</span>
+                    </div>
+                    <div class="px-5 py-3 bg-blue-500/20 border border-blue-500/40 rounded-lg">
+                        <span class="text-blue-400 text-base font-bold tracking-wider">☁️ 多端兼容</span>
+                    </div>
+                </div>
+
+                <!-- 下单秒发货提示 -->
+                <div class="mt-2">
+                    <span class="text-amber-400 font-bold text-lg tracking-wide">下单秒发货</span>
+                </div>
+
+                <!-- LOGO占位区 -->
+                <div class="flex gap-3 mt-auto">
+                    <div class="w-12 h-12 placeholder rounded-lg">
+                        <span class="text-xs">LOGO</span>
+                    </div>
+                    <div class="w-12 h-12 placeholder rounded-lg">
+                        <span class="text-xs">LOGO</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 全局装饰：提升精致感 -->
+        <div class="absolute top-4 right-4 w-2 h-2 rounded-full bg-amber-500/50"></div>
+        <div class="absolute bottom-4 left-4 w-2 h-2 rounded-full bg-amber-500/50"></div>
+    </div>
+</body>
+</html>
