@@ -1,14 +1,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse
 
-from app.api.v1.auth import router as auth_router
-from app.api.v1.user import router as user_router
-from app.api.v1.video import router as video_router
-from app.core.config import settings
-from app.core.exception import BusinessError
-from app.core.exception_handler import validation_exception_handler, business_exception_handler
+from app.modules.router import api_router
+from app.shared.config import settings
+from app.shared.exception import BusinessError
+from app.shared.exception_handler import validation_exception_handler, business_exception_handler
 
 def create_app() -> FastAPI:
     """
@@ -38,9 +35,7 @@ def create_app() -> FastAPI:
     )
     
  
-    app.include_router(auth_router, prefix=settings.API_V1_STR)
-    app.include_router(user_router, prefix=settings.API_V1_STR)
-    app.include_router(video_router, prefix=settings.API_V1_STR)
+    app.include_router(api_router, prefix=settings.API_V1_STR)
     
     @app.get("/")
     async def root():

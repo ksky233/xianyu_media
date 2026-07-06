@@ -1,3 +1,6 @@
+import { useAuthStore } from '@/features/auth/stores/auth-store'
+import { isJwtExpired } from '@/features/auth/utils/token'
+
 export interface ApiResponse<T> {
   code: number
   msg?: string | null
@@ -11,9 +14,28 @@ interface ApiClientOptions extends Omit<RequestInit, 'body'> {
   body?: RequestBody
 }
 
+type ApiResponseBody<T> = Partial<ApiResponse<T>> & {
+  detail?: unknown
+}
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:7000'
+const AUTH_ERROR_CODE = 401001
+
+function clearAuthSession() {
+  useAuthStore.getState().logout()
+
+  if (window.location.pathname !== '/auth') {
+    window.location.replace('/auth')
+  }
+}
 
 function readStoredToken() {
+  const storeToken = useAuthStore.getState().token
+
+  if (storeToken) {
+    return storeToken
+  }
+
   const rawStorage = localStorage.getItem('auth-storage')
 
   if (!rawStorage) {
@@ -28,9 +50,8 @@ function readStoredToken() {
   }
 }
 
-function buildHeaders(options?: ApiClientOptions) {
+function buildHeaders(token: string | null, options?: ApiClientOptions) {
   const headers = new Headers(options?.headers)
-  const token = readStoredToken()
 
   if (!headers.has('Content-Type') && options?.body && !(options.body instanceof FormData)) {
     headers.set('Content-Type', 'application/json')
@@ -43,15 +64,53 @@ function buildHeaders(options?: ApiClientOptions) {
   return headers
 }
 
-async function readErrorMessage(response: Response) {
+async function readResponseBody<T>(response: Response) {
   try {
-    const errorBody = (await response.json()) as Partial<ApiResponse<unknown>> & {
-      detail?: string
-    }
-    return errorBody.msg ?? errorBody.message ?? errorBody.detail ?? '请求失败'
+    return (await response.json()) as ApiResponseBody<T>
   } catch {
-    return '请求失败'
+    return {} as ApiResponseBody<T>
   }
+}
+
+function getDataDetail(data: unknown) {
+  if (data && typeof data === 'object' && 'detail' in data) {
+    const detail = (data as { detail?: unknown }).detail
+    return typeof detail === 'string' ? detail : ''
+  }
+
+  return ''
+}
+
+function getDataErrorCode(data: unknown) {
+  if (data && typeof data === 'object' && 'error_code' in data) {
+    const errorCode = (data as { error_code?: unknown }).error_code
+    return typeof errorCode === 'number' ? errorCode : null
+  }
+
+  return null
+}
+
+function isAuthFailure<T>(response: ApiResponseBody<T>, statusCode: number) {
+  if (statusCode === 401) {
+    return true
+  }
+
+  if (getDataErrorCode(response.data) === AUTH_ERROR_CODE) {
+    return true
+  }
+
+  const message = getApiMessage(response).toLowerCase()
+
+  return (
+    message.includes('token') ||
+    message.includes('令牌') ||
+    message.includes('未认证') ||
+    message.includes('认证失败')
+  )
+}
+
+function getResponseMessage<T>(response: ApiResponseBody<T>) {
+  return getApiMessage(response) || '请求失败'
 }
 
 function resolveBody(body: RequestBody | undefined) {
@@ -67,19 +126,43 @@ function resolveBody(body: RequestBody | undefined) {
 }
 
 export async function apiClient<T>(path: string, options?: ApiClientOptions) {
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    ...options,
-    headers: buildHeaders(options),
-    body: resolveBody(options?.body),
-  })
+  const token = readStoredToken()
 
-  if (!response.ok) {
-    throw new Error(await readErrorMessage(response))
+  if (token && isJwtExpired(token)) {
+    clearAuthSession()
+    throw new Error('登录已过期，请重新登录')
   }
 
-  return response.json() as Promise<ApiResponse<T>>
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    ...options,
+    headers: buildHeaders(token, options),
+    body: resolveBody(options?.body),
+  })
+  const responseBody = await readResponseBody<T>(response)
+
+  if (!response.ok) {
+    if (isAuthFailure(responseBody, response.status)) {
+      clearAuthSession()
+    }
+
+    throw new Error(getResponseMessage(responseBody))
+  }
+
+  if (responseBody.code !== 1) {
+    if (isAuthFailure(responseBody, response.status)) {
+      clearAuthSession()
+    }
+
+    throw new Error(getResponseMessage(responseBody))
+  }
+
+  return responseBody as ApiResponse<T>
 }
 
-export function getApiMessage(response: Pick<ApiResponse<unknown>, 'msg' | 'message'>) {
-  return response.msg ?? response.message ?? ''
+export function getApiMessage(
+  response: Partial<Pick<ApiResponse<unknown>, 'msg' | 'message' | 'data'>> & { detail?: unknown },
+) {
+  const detail = typeof response.detail === 'string' ? response.detail : ''
+
+  return getDataDetail(response.data) || response.msg || response.message || detail
 }

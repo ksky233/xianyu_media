@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 import type { UserInfo } from '@/features/auth/api/auth-api'
+import { isJwtExpired } from '@/features/auth/utils/token'
 
 interface AuthState {
   _hasHydrated: boolean
@@ -45,6 +46,10 @@ export const useAuthStore = create<AuthState>()(
       name: 'auth-storage',
       storage: createJSONStorage(() => localStorage),
       onRehydrateStorage: () => (state) => {
+        if (!state?.token || isJwtExpired(state.token)) {
+          state?.logout()
+        }
+
         state?._setHasHydrated(true)
       },
       partialize: (state) => ({

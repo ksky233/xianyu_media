@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
 import { useAuthStore } from '@/features/auth/stores/auth-store'
+import { isJwtExpired } from '@/features/auth/utils/token'
 
 interface AuthGuardProps {
   children: ReactNode
@@ -8,7 +9,8 @@ interface AuthGuardProps {
 
 export function AuthGuard({ children }: AuthGuardProps) {
   const location = useLocation()
-  const { isAuthenticated, _hasHydrated } = useAuthStore()
+  const { token, isAuthenticated, _hasHydrated } = useAuthStore()
+  const hasValidSession = Boolean(isAuthenticated && token && !isJwtExpired(token))
 
   if (!_hasHydrated) {
     return (
@@ -21,7 +23,7 @@ export function AuthGuard({ children }: AuthGuardProps) {
     )
   }
 
-  if (!isAuthenticated) {
+  if (!hasValidSession) {
     return <Navigate to="/auth" replace state={{ from: location }} />
   }
 

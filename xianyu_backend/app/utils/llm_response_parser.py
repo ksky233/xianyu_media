@@ -1,10 +1,10 @@
 
-from app.core.logger import logger
+from app.shared.logger import logger
 import json
 from typing import TypeVar, Type, Optional, Any
 from pydantic import BaseModel
 
-from app.workflow.video_recongnizer import VideoBaseInfo, VideoSearchInfo, VideoHotInfo
+from app.workflows.video_recongnizer import VideoBaseInfo, VideoSearchInfo, VideoHotInfo
 
 T = TypeVar('T', bound=BaseModel)
 
